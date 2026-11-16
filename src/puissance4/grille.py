@@ -1,16 +1,33 @@
+import os
+
+
+def clear_console():
+    os.system("cls" if os.name == "nt" else "clear")
+
+
 class Grille:
     def __init__(self):
         self.grille = [["  " for _ in range(7)] for _ in range(6)]
 
-    def afficher(self):
-        print(" 1  2  3  4  5  6  7")
+    def afficher(self, colonne=None, couleur=None):
+        clear_console()
+
+        # Affichage du pion en déplacement
+        if colonne is not None and couleur is not None:
+            affichage = ["  " for _ in range(7)]
+            affichage[colonne] = couleur
+            print("|" + "|".join(affichage) + "|")
+        else:
+            print(" 1  2  3  4  5  6  7")
+
         for ligne in self.grille:
             print("|" + "|".join(ligne) + "|")
-        print("---------------")
+
+        print("-------------------------------")
 
     def ajouter_pion(self, colonne, couleur):
         for ligne in reversed(self.grille):
-            if ligne[colonne] != "🔴" and ligne[colonne] != "🟡":
+            if ligne[colonne] not in ("🔴", "🟡"):
                 ligne[colonne] = couleur
                 return True
         return False

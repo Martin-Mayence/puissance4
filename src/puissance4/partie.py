@@ -1,3 +1,7 @@
+import random
+
+import keyboard
+
 from puissance4.grille import Grille
 from puissance4.joueur import Joueur
 
@@ -14,86 +18,134 @@ class Partie:
             self.joueur1 if self.joueur_actuel == self.joueur2 else self.joueur2
         )
 
+    def on_key_press(self, key):
+        if key.scan_code == 77:
+            return "droite"
+        elif key.scan_code == 75:
+            return "gauche"
+        elif key.scan_code == 28:
+            return "entrer"
+        return None
+
     def jouer(self):
+        colonne = 3
+
         while True:
-            self.grille.afficher()
-            try:
-                colonne = (
-                    int(
-                        input(
-                            f"{self.joueur_actuel.nom} ({self.joueur_actuel.couleur}), choisissez une colonne (1-7): "
-                        )
-                    )
-                    - 1
-                )
-                if colonne < 0 or colonne > 6:
-                    print(
-                        "Colonne invalide. Veuillez choisir une colonne entre 1 et 7."
-                    )
+            self.grille.afficher(colonne, self.joueur_actuel.couleur)
+
+            key = keyboard.read_event()
+
+            # On ignore les relâchements
+            if key.event_type != keyboard.KEY_DOWN:
+                continue
+
+            action = self.on_key_press(key)
+
+            if action == "droite":
+                colonne = (colonne + 1) % 7
+
+            elif action == "gauche":
+                colonne = (colonne - 1) % 7
+
+            elif action == "entrer":
+                if not self.grille.ajouter_pion(colonne, self.joueur_actuel.couleur):
+                    print("Cette colonne est pleine !")
+                    print("Appuyez sur Entrée pour continuer.")
+
+                    keyboard.wait("enter")
                     continue
-            except ValueError:
-                print("Entrée invalide. Veuillez entrer un nombre entre 1 et 7.")
-                continue
 
-            if not self.grille.ajouter_pion(colonne, self.joueur_actuel.couleur):
-                print("Cette colonne est pleine. Veuillez en choisir une autre.")
-                continue
+                if self.grille.verifier_victoire(self.joueur_actuel.couleur):
+                    self.grille.afficher()
+                    print(
+                        f"Félicitations {self.joueur_actuel.nom} "
+                        f"({self.joueur_actuel.couleur}) ! Vous avez gagné !"
+                    )
+                    input("Appuyez sur Entrée pour quitter la partie.")
+                    break
 
-            if self.grille.verifier_victoire(self.joueur_actuel.couleur):
-                self.grille.afficher()
-                print(
-                    f"Félicitations {self.joueur_actuel.nom} ({self.joueur_actuel.couleur}) ! Vous avez gagné !"
-                )
-                break
+                if self.grille.est_pleine():
+                    self.grille.afficher()
+                    print("Match nul ! La grille est pleine.")
+                    break
 
-            if self.grille.est_pleine():
-                self.grille.afficher()
-                print("Match nul ! La grille est pleine.")
-                break
+                self.changer_joueur()
+                colonne = 3
 
-            self.changer_joueur()
+            # Attendre le relâchement de la touche
+            while (
+                keyboard.is_pressed("left")
+                or keyboard.is_pressed("right")
+                or keyboard.is_pressed("enter")
+            ):
+                pass
 
     def jouer_contre_ordinateur(self):
-        import random
+        colonne = 3
 
         while True:
-            self.grille.afficher()
-            if self.joueur_actuel == self.joueur1:
-                try:
-                    colonne = (
-                        int(
-                            input(
-                                f"{self.joueur_actuel.nom} ({self.joueur_actuel.couleur}), choisissez une colonne (1-7): "
-                            )
-                        )
-                        - 1
-                    )
-                    if colonne < 0 or colonne > 6:
-                        print(
-                            "Colonne invalide. Veuillez choisir une colonne entre 1 et 7."
-                        )
-                        continue
-                except ValueError:
-                    print("Entrée invalide. Veuillez entrer un nombre entre 1 et 7.")
-                    continue
-            else:
-                colonne = random.randint(0, 6)
-                print(f"L'ordinateur choisit la colonne {colonne + 1}.")
+            self.grille.afficher(colonne, self.joueur_actuel.couleur)
 
-            if not self.grille.ajouter_pion(colonne, self.joueur_actuel.couleur):
-                print("Cette colonne est pleine. Veuillez en choisir une autre.")
+            key = keyboard.read_event()
+
+            # On ignore les relâchements
+            if key.event_type != keyboard.KEY_DOWN:
                 continue
 
-            if self.grille.verifier_victoire(self.joueur_actuel.couleur):
-                self.grille.afficher()
-                print(
-                    f"Félicitations {self.joueur_actuel.nom} ({self.joueur_actuel.couleur}) ! Vous avez gagné !"
-                )
-                break
+            action = self.on_key_press(key)
 
-            if self.grille.est_pleine():
-                self.grille.afficher()
-                print("Match nul ! La grille est pleine.")
-                break
+            if action == "droite":
+                colonne = (colonne + 1) % 7
 
-            self.changer_joueur()
+            elif action == "gauche":
+                colonne = (colonne - 1) % 7
+
+            elif action == "entrer":
+                if not self.grille.ajouter_pion(colonne, self.joueur_actuel.couleur):
+                    print("Cette colonne est pleine !")
+                    print("Appuyez sur Entrée pour continuer.")
+
+                    keyboard.wait("enter")
+                    continue
+
+                if self.grille.verifier_victoire(self.joueur_actuel.couleur):
+                    self.grille.afficher()
+                    print(
+                        f"Félicitations {self.joueur_actuel.nom} "
+                        f"({self.joueur_actuel.couleur}) ! Vous avez gagné !"
+                    )
+                    input("Appuyez sur Entrée pour quitter la partie.")
+                    break
+
+                if self.grille.est_pleine():
+                    self.grille.afficher()
+                    print("Match nul ! La grille est pleine.")
+                    break
+
+                self.changer_joueur()
+                # Attendre le relâchement de la touche
+                while (
+                    keyboard.is_pressed("left")
+                    or keyboard.is_pressed("right")
+                    or keyboard.is_pressed("enter")
+                ):
+                    pass
+                # Tour de l'ordinateur
+                colonne_ordinateur = random.randint(0, 6)
+                while not self.grille.ajouter_pion(
+                    colonne_ordinateur, self.joueur_actuel.couleur
+                ):
+                    colonne_ordinateur = random.randint(0, 6)
+
+                if self.grille.verifier_victoire(self.joueur_actuel.couleur):
+                    self.grille.afficher()
+                    print("Dommage, l'ordinateur a gagné !")
+                    input("Appuyez sur Entrée pour quitter la partie.")
+                    break
+
+                if self.grille.est_pleine():
+                    self.grille.afficher()
+                    print("Match nul ! La grille est pleine.")
+                    break
+
+                self.changer_joueur()
