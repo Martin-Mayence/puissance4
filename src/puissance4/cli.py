@@ -9,8 +9,16 @@ def main():
     choix = input("Votre choix : ")
 
     if choix == "1":
-        partie = Partie()
-        partie.jouer()
+        print("Nouvelle partie !")
+        print("1. Partie contre un autre joueur")
+        print("2. Partie contre l'ordinateur ")
+        sous_choix = input("Votre choix : ")
+        if sous_choix == "1":
+            partie = Partie()
+            partie.jouer()
+        else:
+            partie = Partie()
+            partie.jouer_contre_ordinateur()
 
     elif choix == "2":
         print("Au revoir !")

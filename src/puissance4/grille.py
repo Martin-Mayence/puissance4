@@ -1,22 +1,26 @@
 class Grille:
     def __init__(self):
-        self.grille = [[" " for _ in range(7)] for _ in range(6)]
+        self.grille = [["  " for _ in range(7)] for _ in range(6)]
 
     def afficher(self):
-        print(" 1 2 3 4 5 6 7")
+        print(" 1  2  3  4  5  6  7")
         for ligne in self.grille:
             print("|" + "|".join(ligne) + "|")
         print("---------------")
 
     def ajouter_pion(self, colonne, couleur):
         for ligne in reversed(self.grille):
-            if ligne[colonne] == " ":
+            if ligne[colonne] != "🔴" and ligne[colonne] != "🟡":
                 ligne[colonne] = couleur
                 return True
         return False
 
     def est_pleine(self):
-        return all(cellule != " " for ligne in self.grille for cellule in ligne)
+        return all(
+            cellule == "🔴" or cellule == "🟡"
+            for ligne in self.grille
+            for cellule in ligne
+        )
 
     def verifier_victoire(self, couleur):
         # Vérification des lignes
